@@ -16,6 +16,8 @@ public class ImagingSatellite extends Satellite {
             System.out.println(name + ": Съемка территории с разрешением " + resolution + " м/пиксель");
             takePhoto();
             consumeBattery(0.08);
+        } else {
+            System.out.println("🛑 " + name + ": Не может выполнить съемку - не активен");
         }
     }
 

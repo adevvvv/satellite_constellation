@@ -14,6 +14,8 @@ public class CommunicationSatellite extends Satellite {
             System.out.println(name + ": Передача данных со скоростью " + bandwidth + " Мбит/с");
             sendData(bandwidth);
             consumeBattery(0.05);
+        } else {
+            System.out.println("🛑 " + name + ": Не может выполнить миссию - не активен");
         }
     }
 
