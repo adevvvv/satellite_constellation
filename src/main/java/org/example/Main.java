@@ -2,36 +2,46 @@ package org.example;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Тестирование спутниковой группировки:");
+        System.out.println("ЗАПУСК СИСТЕМЫ УПРАВЛЕНИЯ СПУТНИКОВОЙ ГРУППИРОВКОЙ");
+        System.out.println("=".repeat(60));
 
-        // Создаем спутники
+        System.out.println("СОЗДАНИЕ СПЕЦИАЛИЗИРОВАННЫХ СПУТНИКОВ:");
+        System.out.println("-".repeat(45));
+
         CommunicationSatellite commSat1 = new CommunicationSatellite("Связь-1", 0.85, 500);
         CommunicationSatellite commSat2 = new CommunicationSatellite("Связь-2", 0.75, 1000);
         ImagingSatellite imgSat1 = new ImagingSatellite("ДЗЗ-1", 0.92, 2.5);
         ImagingSatellite imgSat2 = new ImagingSatellite("ДЗЗ-2", 0.45, 1.0);
+        ImagingSatellite imgSat3 = new ImagingSatellite("ДЗЗ-3", 0.15, 0.5);
 
-        // Создаем группировку
-        SatelliteConstellation constellation = new SatelliteConstellation("Test Group");
+        System.out.println("-".repeat(45));
 
-        // Добавляем спутники
+        SatelliteConstellation constellation = new SatelliteConstellation("RU Basic");
+        System.out.println("-".repeat(45));
+
+        System.out.println("ФОРМИРОВАНИЕ ГРУППИРОВКИ:");
+        System.out.println("-".repeat(35));
         constellation.addSatellite(commSat1);
         constellation.addSatellite(commSat2);
         constellation.addSatellite(imgSat1);
         constellation.addSatellite(imgSat2);
+        constellation.addSatellite(imgSat3);
+        System.out.println("-".repeat(35));
 
-        // Активируем
-        System.out.println("\nАктивация спутников:");
-        for (Satellite sat : constellation.getSatellites()) {
-            System.out.println(sat.name + ": " + (sat.activate() ? "Активация успешна" : "Ошибка активации"));
-        }
+        System.out.println(constellation.getSatellites());
+        System.out.println("-".repeat(35));
 
-        // Выполняем миссии
-        System.out.println("\nВыполнение всех миссий группировки:");
+        System.out.println("АКТИВАЦИЯ СПУТНИКОВ:");
+        System.out.println("-".repeat(25));
+        commSat1.activate();
+        commSat2.activate();
+        imgSat1.activate();
+        imgSat2.activate();
+        imgSat3.activate();
+
         constellation.executeAllMissions();
 
-        System.out.println("\nФинальное состояние:");
-        for (Satellite sat : constellation.getSatellites()) {
-            System.out.println(sat.toString());
-        }
+        System.out.println("\nФИНАЛЬНОЕ СОСТОЯНИЕ СПУТНИКОВ:");
+        System.out.println(constellation.getSatellites());
     }
 }
