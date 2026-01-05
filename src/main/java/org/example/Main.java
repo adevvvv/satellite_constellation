@@ -2,18 +2,24 @@ package org.example;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Тестирование спутника ДЗЗ:");
-        ImagingSatellite imgSat = new ImagingSatellite("ДЗЗ-Тест", 0.9, 2.5);
+        System.out.println("Тестирование обоих типов спутников:");
 
-        System.out.println("Активация спутника:");
-        boolean activated = imgSat.activate();
-        System.out.println("Активация " + (activated ? "успешна" : "не удалась"));
+        // Спутник связи
+        CommunicationSatellite commSat = new CommunicationSatellite("Связь-Тест", 0.8, 500);
 
-        if (activated) {
-            System.out.println("\nВыполнение миссии:");
-            imgSat.performMission();
-        }
+        // Спутник ДЗЗ
+        ImagingSatellite imgSat = new ImagingSatellite("ДЗЗ-Тест", 0.6, 1.0);
 
-        System.out.println("\nСостояние спутника: " + imgSat.toString());
+        System.out.println("\nАктивация спутников:");
+        System.out.println("Связь-Тест: " + (commSat.activate() ? "Активация успешна" : "Ошибка активации"));
+        System.out.println("ДЗЗ-Тест: " + (imgSat.activate() ? "Активация успешна" : "Ошибка активации"));
+
+        System.out.println("\nВыполнение миссий:");
+        commSat.performMission();
+        imgSat.performMission();
+
+        System.out.println("\nСостояние спутников:");
+        System.out.println(commSat.toString());
+        System.out.println(imgSat.toString());
     }
 }
