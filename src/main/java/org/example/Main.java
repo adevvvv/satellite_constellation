@@ -2,24 +2,36 @@ package org.example;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Тестирование обоих типов спутников:");
+        System.out.println("Тестирование спутниковой группировки:");
 
-        // Спутник связи
-        CommunicationSatellite commSat = new CommunicationSatellite("Связь-Тест", 0.8, 500);
+        // Создаем спутники
+        CommunicationSatellite commSat1 = new CommunicationSatellite("Связь-1", 0.85, 500);
+        CommunicationSatellite commSat2 = new CommunicationSatellite("Связь-2", 0.75, 1000);
+        ImagingSatellite imgSat1 = new ImagingSatellite("ДЗЗ-1", 0.92, 2.5);
+        ImagingSatellite imgSat2 = new ImagingSatellite("ДЗЗ-2", 0.45, 1.0);
 
-        // Спутник ДЗЗ
-        ImagingSatellite imgSat = new ImagingSatellite("ДЗЗ-Тест", 0.6, 1.0);
+        // Создаем группировку
+        SatelliteConstellation constellation = new SatelliteConstellation("Test Group");
 
+        // Добавляем спутники
+        constellation.addSatellite(commSat1);
+        constellation.addSatellite(commSat2);
+        constellation.addSatellite(imgSat1);
+        constellation.addSatellite(imgSat2);
+
+        // Активируем
         System.out.println("\nАктивация спутников:");
-        System.out.println("Связь-Тест: " + (commSat.activate() ? "Активация успешна" : "Ошибка активации"));
-        System.out.println("ДЗЗ-Тест: " + (imgSat.activate() ? "Активация успешна" : "Ошибка активации"));
+        for (Satellite sat : constellation.getSatellites()) {
+            System.out.println(sat.name + ": " + (sat.activate() ? "Активация успешна" : "Ошибка активации"));
+        }
 
-        System.out.println("\nВыполнение миссий:");
-        commSat.performMission();
-        imgSat.performMission();
+        // Выполняем миссии
+        System.out.println("\nВыполнение всех миссий группировки:");
+        constellation.executeAllMissions();
 
-        System.out.println("\nСостояние спутников:");
-        System.out.println(commSat.toString());
-        System.out.println(imgSat.toString());
+        System.out.println("\nФинальное состояние:");
+        for (Satellite sat : constellation.getSatellites()) {
+            System.out.println(sat.toString());
+        }
     }
 }
