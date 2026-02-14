@@ -12,6 +12,11 @@ public class SatelliteConstellation {
         System.out.println("✨ Создана спутниковая группировка: " + constellationName);
     }
 
+    public String getConstellationName() {
+        return constellationName;
+    }
+
+    // остальные методы остаются без изменений
     public void addSatellite(Satellite satellite) {
         if (satellite != null && !satellites.contains(satellite)) {
             satellites.add(satellite);
@@ -30,5 +35,13 @@ public class SatelliteConstellation {
 
     public List<Satellite> getSatellites() {
         return new ArrayList<>(satellites);
+    }
+
+    @Override
+    public String toString() {
+        return "SatelliteConstellation{" +
+                "constellationName='" + constellationName + '\'' +
+                ", satellites=" + satellites +
+                '}';
     }
 }
