@@ -9,23 +9,23 @@ public class SatelliteConstellation {
 
     public SatelliteConstellation(String constellationName) {
         this.constellationName = constellationName;
-        System.out.println("Создана спутниковая группировка: " + constellationName);
+        System.out.println("✨ Создана спутниковая группировка: " + constellationName);
     }
 
     public void addSatellite(Satellite satellite) {
         if (satellite != null && !satellites.contains(satellite)) {
             satellites.add(satellite);
-            System.out.println(satellite.getName() + " добавлен в группировку '" + constellationName + "'");
+            System.out.println("➕ " + satellite.getName() + " добавлен в группировку '" + constellationName + "'");
         }
     }
 
     public void executeAllMissions() {
-        System.out.println("\nВЫПОЛНЕНИЕ МИССИЙ ГРУППИРОВКИ " + constellationName.toUpperCase());
-        System.out.println("=".repeat(50));
+        System.out.println("\n🚀 ВЫПОЛНЕНИЕ МИССИЙ ГРУППИРОВКИ " + constellationName.toUpperCase());
+        System.out.println("=".repeat(60));
         for (Satellite satellite : satellites) {
             satellite.performMission();
         }
-        System.out.println("=".repeat(50));
+        System.out.println("=".repeat(60));
     }
 
     public List<Satellite> getSatellites() {

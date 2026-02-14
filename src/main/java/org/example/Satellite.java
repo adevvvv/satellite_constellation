@@ -2,51 +2,42 @@ package org.example;
 
 public abstract class Satellite {
     protected String name;
-    protected boolean isActive;
-    protected double batteryLevel;
+    protected SatelliteState state;
+    protected EnergySystem energy;
 
     public Satellite(String name, double batteryLevel) {
         this.name = name;
-        this.batteryLevel = Math.max(0.0, Math.min(1.0, batteryLevel));
-        this.isActive = false;
-        System.out.println("Создан спутник: " + name + " (заряд: " + (int) (batteryLevel * 100) + "%)");
+        this.state = new SatelliteState();
+        this.energy = new EnergySystem(batteryLevel);
+        System.out.println("Создан спутник: " + name + " (заряд: " + energy.getBatteryLevel() + ")");
     }
 
-    // Геттеры
     public String getName() {
         return name;
     }
 
-    public boolean isActive() {
-        return isActive;
+    public SatelliteState getState() {
+        return state;
     }
 
-    public double getBatteryLevel() {
-        return batteryLevel;
+    public EnergySystem getEnergy() {
+        return energy;
     }
 
     public boolean activate() {
-        if (batteryLevel > 0.2 && !isActive) {
-            isActive = true;
+        if (state.activate(energy.hasSufficientPower())) {
             System.out.println("✅ " + name + ": Активация успешна");
             return true;
         }
-        System.out.println("🛑 " + name + ": Ошибка активации (заряд: " + (int) (batteryLevel * 100) + "%)");
+        System.out.println("🛑 " + name + ": Ошибка активации (заряд: " + 
+            (int)(getEnergy().getBatteryLevel() * 100) + "%)");
         return false;
     }
 
     public void deactivate() {
-        if (isActive) {
-            isActive = false;
-        }
-    }
-
-    protected void consumeBattery(double amount) {
-        if (amount > 0) {
-            batteryLevel = Math.max(0.0, batteryLevel - amount);
-            if (batteryLevel <= 0.2 && isActive) {
-                deactivate();
-            }
+        if (state.isActive()) {
+            state.deactivate();
+            System.out.println("⏹️ " + name + ": Деактивирован");
         }
     }
 

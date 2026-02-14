@@ -12,25 +12,26 @@ public class ImagingSatellite extends Satellite {
 
     @Override
     public void performMission() {
-        if (isActive) {
-            System.out.println(name + ": Съемка территории с разрешением " + resolution + " м/пиксель");
+        if (state.isActive()) {
+            System.out.println("🛰️ " + name + ": Съемка территории с разрешением " + resolution + " м/пиксель");
             takePhoto();
-            consumeBattery(0.08);
+            energy.consume(0.08);
         } else {
-            System.out.println("🛑 " + name + ": Не может выполнить съемку - не активен");
+            System.out.println("🛑 " + name + ": Не может выполнить съемку - не активен (статус: " + getState().getStatus() + ")");
         }
     }
 
     private void takePhoto() {
-        if (isActive) {
+        if (state.isActive()) {
             photosTaken++;
-            System.out.println(name + ": Снимок #" + photosTaken + " сделан!");
+            System.out.println("📸 " + name + ": Снимок #" + photosTaken + " сделан!");
         }
     }
 
     @Override
     public String toString() {
         return "ImagingSatellite{resolution=" + resolution + ", photosTaken=" + photosTaken +
-                ", name='" + name + "', isActive=" + isActive + ", batteryLevel=" + batteryLevel + "}";
+                ", name='" + name + "', state=" + state +
+                ", energy=" + energy + "}";
     }
 }
