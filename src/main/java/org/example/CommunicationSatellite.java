@@ -1,5 +1,12 @@
 package org.example;
 
+import lombok.Getter;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
+
+@Getter
+@ToString(callSuper = true)
+@Slf4j
 public class CommunicationSatellite extends Satellite {
     private final double bandwidth;
 
@@ -11,22 +18,16 @@ public class CommunicationSatellite extends Satellite {
     @Override
     public void performMission() {
         if (state.isActive()) {
-            System.out.println("📡 " + name + ": Передача данных со скоростью " + bandwidth + " Мбит/с");
+            log.info("📡 {}: Передача данных со скоростью {} Мбит/с", name, bandwidth);
             sendData(bandwidth);
             energy.consume(0.05);
         } else {
-            System.out.println("🛑 " + name + ": Не может выполнить миссию - не активен (статус: " + state.getStatus() + ")");
+            log.info("🛑 {}: Не может выполнить миссию - не активен (статус: {})",
+                    name, state.getStatus());
         }
     }
 
     private void sendData(double dataAmount) {
-        System.out.println("📤 " + name + ": Отправил " + dataAmount + " Мбит данных!");
-    }
-
-    @Override
-    public String toString() {
-        return "CommunicationSatellite{bandwidth=" + bandwidth +
-                ", name='" + name + "', state=" + state +
-                ", energy=" + energy + "}";
+        log.info("📤 {}: Отправил {} Мбит данных!", name, dataAmount);
     }
 }

@@ -1,5 +1,12 @@
 package org.example;
 
+import lombok.Getter;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
+
+@Getter
+@ToString
+@Slf4j
 public abstract class Satellite {
     protected String name;
     protected SatelliteState state;
@@ -9,35 +16,23 @@ public abstract class Satellite {
         this.name = name;
         this.state = new SatelliteState();
         this.energy = new EnergySystem(batteryLevel);
-        System.out.println("Создан спутник: " + name + " (заряд: " + energy.getBatteryLevel() + ")");
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public SatelliteState getState() {
-        return state;
-    }
-
-    public EnergySystem getEnergy() {
-        return energy;
+        log.info("Создан спутник: {} (заряд: {})", name, energy.getBatteryLevel());
     }
 
     public boolean activate() {
         if (state.activate(energy.hasSufficientPower())) {
-            System.out.println("✅ " + name + ": Активация успешна");
+            log.info("✅ {}: Активация успешна", name);
             return true;
         }
-        System.out.println("🛑 " + name + ": Ошибка активации (заряд: " + 
-            (int)(getEnergy().getBatteryLevel() * 100) + "%)");
+        log.info("🛑 {}: Ошибка активации (заряд: {}%)",
+                name, (int)(getEnergy().getBatteryLevel() * 100));
         return false;
     }
 
     public void deactivate() {
         if (state.isActive()) {
             state.deactivate();
-            System.out.println("⏹️ " + name + ": Деактивирован");
+            log.info("⏹️ {}: Деактивирован", name);
         }
     }
 

@@ -1,5 +1,12 @@
 package org.example;
 
+import lombok.Getter;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
+
+@Getter
+@ToString(callSuper = true)
+@Slf4j
 public class ImagingSatellite extends Satellite {
     private final double resolution;
     private int photosTaken;
@@ -13,25 +20,19 @@ public class ImagingSatellite extends Satellite {
     @Override
     public void performMission() {
         if (state.isActive()) {
-            System.out.println("🛰️ " + name + ": Съемка территории с разрешением " + resolution + " м/пиксель");
+            log.info("🛰️ {}: Съемка территории с разрешением {} м/пиксель", name, resolution);
             takePhoto();
             energy.consume(0.08);
         } else {
-            System.out.println("🛑 " + name + ": Не может выполнить съемку - не активен (статус: " + getState().getStatus() + ")");
+            log.info("🛑 {}: Не может выполнить съемку - не активен (статус: {})",
+                    name, getState().getStatus());
         }
     }
 
     private void takePhoto() {
         if (state.isActive()) {
             photosTaken++;
-            System.out.println("📸 " + name + ": Снимок #" + photosTaken + " сделан!");
+            log.info("📸 {}: Снимок #{} сделан!", name, photosTaken);
         }
-    }
-
-    @Override
-    public String toString() {
-        return "ImagingSatellite{resolution=" + resolution + ", photosTaken=" + photosTaken +
-                ", name='" + name + "', state=" + state +
-                ", energy=" + energy + "}";
     }
 }

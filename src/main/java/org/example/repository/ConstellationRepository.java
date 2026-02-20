@@ -1,16 +1,19 @@
-package org.example;
+package org.example.repository;
 
+import org.example.SatelliteConstellation;
 import org.springframework.stereotype.Repository;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 
 @Repository
+@Slf4j
 public class ConstellationRepository {
     private final Map<String, SatelliteConstellation> constellations = new HashMap<>();
 
     public void addConstellation(SatelliteConstellation constellation) {
         constellations.put(constellation.getConstellationName(), constellation);
-        System.out.println("Сохранена группировка: " + constellation.getConstellationName());
+        log.info("Сохранена группировка: {}", constellation.getConstellationName());
     }
 
     public SatelliteConstellation getConstellation(String name) {
@@ -31,16 +34,21 @@ public class ConstellationRepository {
 
     public void removeConstellation(String name) {
         constellations.remove(name);
-        System.out.println("Удалена группировка: " + name);
+        log.info("Удалена группировка: {}", name);
     }
 
-    // Добавляем метод update
     public void updateConstellation(SatelliteConstellation constellation) {
         if (constellations.containsKey(constellation.getConstellationName())) {
             constellations.put(constellation.getConstellationName(), constellation);
-            System.out.println("Обновлена группировка: " + constellation.getConstellationName());
+            log.info("Обновлена группировка: {}", constellation.getConstellationName());
         } else {
-            throw new RuntimeException("Группировка не найдена для обновления: " + constellation.getConstellationName());
+            throw new RuntimeException("Группировка не найдена для обновления: " +
+                    constellation.getConstellationName());
         }
+    }
+
+    public void clear() {
+        constellations.clear();
+        log.info("Репозиторий очищен");
     }
 }

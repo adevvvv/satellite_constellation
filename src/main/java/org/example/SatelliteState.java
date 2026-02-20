@@ -1,5 +1,10 @@
 package org.example;
 
+import lombok.Getter;
+import lombok.ToString;
+
+@Getter
+@ToString
 public class SatelliteState {
     private boolean isActive = false;
     private String statusMessage;
@@ -22,20 +27,7 @@ public class SatelliteState {
         isActive = false;
         statusMessage = "Деактивирован";
     }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
     public String getStatus() {
         return statusMessage;
-    }
-
-    @Override
-    public String toString() {
-        return "SatelliteState{" +
-                "isActive='" + isActive + '\'' +
-                ", statusMessage='" + statusMessage + '\'' +
-                '}';
     }
 }

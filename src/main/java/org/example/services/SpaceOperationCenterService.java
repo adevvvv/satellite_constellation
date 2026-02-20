@@ -1,5 +1,8 @@
-package org.example;
+package org.example.services;
 
+import org.example.Satellite;
+import org.example.SatelliteConstellation;
+import org.example.repository.ConstellationRepository;
 import org.springframework.stereotype.Service;
 import java.util.Map;
 
