@@ -1,9 +1,9 @@
 package org.example;
 
-import org.example.CommunicationSatellite;
-import org.example.ImagingSatellite;
-import org.example.Satellite;
-import org.example.SatelliteConstellation;
+import org.example.domains.CommunicationSatellite;
+import org.example.domains.ImagingSatellite;
+import org.example.domains.Satellite;
+import org.example.domains.SatelliteConstellation;
 import org.example.repository.ConstellationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -147,13 +147,11 @@ class ConstellationRepositoryMockTest {
         }
 
         @Test
-        @DisplayName("Обновление несуществующей группировки должно выбросить исключение - ИСПРАВЛЕНО")
+        @DisplayName("Обновление несуществующей группировки должно выбросить исключение")
         void updateNonExistentConstellation_ShouldThrowException() {
-            // Arrange
             String nonExistentName = "NonExistent";
             SatelliteConstellation nonExistent = new SatelliteConstellation(nonExistentName);
 
-            // Для void методов используем doThrow()
             doThrow(new RuntimeException("Группировка не найдена для обновления: " + nonExistentName))
                     .when(mockRepository).updateConstellation(nonExistent);
 
@@ -165,17 +163,11 @@ class ConstellationRepositoryMockTest {
         }
 
         @Test
-        @DisplayName("Обновление с проверкой наличия - ИСПРАВЛЕНО")
+        @DisplayName("Обновление с проверкой наличия")
         void updateConstellation_WithExistenceCheck() {
-            // Arrange
-            SatelliteConstellation updatedConstellation =
-                    new SatelliteConstellation(CONSTELLATION_NAME_1);
+            SatelliteConstellation updatedConstellation = new SatelliteConstellation(CONSTELLATION_NAME_1);
 
-            // Мокируем contains для возврата true
             when(mockRepository.containsConstellation(CONSTELLATION_NAME_1)).thenReturn(true);
-
-            // Для void методов не нужно ставить when, просто вызываем
-            // Но можем использовать doNothing() если хотим явно указать
             doNothing().when(mockRepository).updateConstellation(updatedConstellation);
 
             // Act - эмулируем логику сервиса

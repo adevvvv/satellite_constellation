@@ -1,8 +1,9 @@
-package org.example;
+package org.example.domains;
 
 import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.example.constants.SatelliteConstants;
 
 @Getter
 @ToString(callSuper = true)
@@ -21,18 +22,11 @@ public class ImagingSatellite extends Satellite {
     public void performMission() {
         if (state.isActive()) {
             log.info("🛰️ {}: Съемка территории с разрешением {} м/пиксель", name, resolution);
-            takePhoto();
-            energy.consume(0.08);
-        } else {
-            log.info("🛑 {}: Не может выполнить съемку - не активен (статус: {})",
-                    name, getState().getStatus());
-        }
-    }
-
-    private void takePhoto() {
-        if (state.isActive()) {
             photosTaken++;
             log.info("📸 {}: Снимок #{} сделан!", name, photosTaken);
+            energy.consume(SatelliteConstants.IMAGING_ENERGY_CONSUMPTION);
+        } else {
+            log.info("🛑 {}: Не может выполнить съемку - не активен", name);
         }
     }
 }

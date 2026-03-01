@@ -1,8 +1,9 @@
-package org.example;
+package org.example.domains;
 
 import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.example.constants.SatelliteConstants;
 
 @Getter
 @ToString(callSuper = true)
@@ -19,15 +20,9 @@ public class CommunicationSatellite extends Satellite {
     public void performMission() {
         if (state.isActive()) {
             log.info("📡 {}: Передача данных со скоростью {} Мбит/с", name, bandwidth);
-            sendData(bandwidth);
-            energy.consume(0.05);
+            energy.consume(SatelliteConstants.COMMUNICATION_ENERGY_CONSUMPTION);
         } else {
-            log.info("🛑 {}: Не может выполнить миссию - не активен (статус: {})",
-                    name, state.getStatus());
+            log.info("🛑 {}: Не может выполнить миссию - не активен", name);
         }
-    }
-
-    private void sendData(double dataAmount) {
-        log.info("📤 {}: Отправил {} Мбит данных!", name, dataAmount);
     }
 }

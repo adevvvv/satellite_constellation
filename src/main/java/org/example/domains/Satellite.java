@@ -1,4 +1,4 @@
-package org.example;
+package org.example.domains;
 
 import lombok.Getter;
 import lombok.ToString;
@@ -15,18 +15,17 @@ public abstract class Satellite {
     public Satellite(String name, double batteryLevel) {
         this.name = name;
         this.state = new SatelliteState();
-        this.energy = new EnergySystem(batteryLevel);
+        this.energy = EnergySystem.of(batteryLevel);
         log.info("Создан спутник: {} (заряд: {})", name, energy.getBatteryLevel());
     }
 
-    public boolean activate() {
+    public void activate() {
         if (state.activate(energy.hasSufficientPower())) {
             log.info("✅ {}: Активация успешна", name);
-            return true;
+        } else {
+            log.info("🛑 {}: Ошибка активации (заряд: {}%)",
+                    name, (int)(energy.getBatteryLevel() * 100));
         }
-        log.info("🛑 {}: Ошибка активации (заряд: {}%)",
-                name, (int)(getEnergy().getBatteryLevel() * 100));
-        return false;
     }
 
     public void deactivate() {

@@ -1,4 +1,4 @@
-package org.example;
+package org.example.domains;
 
 import lombok.Getter;
 import lombok.ToString;
@@ -7,11 +7,7 @@ import lombok.ToString;
 @ToString
 public class SatelliteState {
     private boolean isActive = false;
-    private String statusMessage;
-
-    public SatelliteState() {
-        this.statusMessage = "Не активирован";
-    }
+    private String statusMessage = "Не активирован";
 
     public boolean activate(boolean hasSufficientPower) {
         if (hasSufficientPower && !isActive) {
@@ -27,6 +23,7 @@ public class SatelliteState {
         isActive = false;
         statusMessage = "Деактивирован";
     }
+
     public String getStatus() {
         return statusMessage;
     }

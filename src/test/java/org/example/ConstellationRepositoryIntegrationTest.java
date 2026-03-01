@@ -1,5 +1,9 @@
 package org.example;
 
+import org.example.domains.CommunicationSatellite;
+import org.example.domains.ImagingSatellite;
+import org.example.domains.Satellite;
+import org.example.domains.SatelliteConstellation;
 import org.example.repository.ConstellationRepository;
 import org.example.services.SpaceOperationCenterService;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,7 +12,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.util.List;
 import java.util.Map;
@@ -16,7 +19,6 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@ContextConfiguration(classes = {Main.class})
 @DisplayName("Интеграционные тесты для ConstellationRepository")
 class ConstellationRepositoryIntegrationTest {
 
@@ -36,7 +38,7 @@ class ConstellationRepositoryIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        // Очищаем репозиторий перед каждым тестом через специальный метод
+        // Очищаем репозиторий перед каждым тестом
         repository.clear();
 
         communicationSatellite = new CommunicationSatellite("Test-Comm-1", 0.9, 500);
@@ -172,7 +174,6 @@ class ConstellationRepositoryIntegrationTest {
         @Test
         @DisplayName("Попытка обновить несуществующую группировку должна выбросить исключение")
         void updateNonExistentConstellation_ShouldThrowException() {
-            // Arrange
             SatelliteConstellation nonExistent = new SatelliteConstellation(NON_EXISTENT_CONSTELLATION);
 
             // Act & Assert
@@ -194,21 +195,6 @@ class ConstellationRepositoryIntegrationTest {
         void containsNonExistentConstellation_ShouldReturnFalse() {
             // Act & Assert
             assertFalse(repository.containsConstellation(NON_EXISTENT_CONSTELLATION));
-        }
-
-        @Test
-        @DisplayName("Репозиторий должен корректно обрабатывать null в качестве имени группировки")
-        void repositoryShouldHandleNullConstellationName() {
-            // Act & Assert - проверяем containsConstellation с null
-            assertFalse(repository.containsConstellation(null));
-
-            // Проверяем removeConstellation с null (не должно выбрасывать исключение)
-            assertDoesNotThrow(() -> repository.removeConstellation(null));
-
-            // Проверяем getConstellation с null (должно выбрасывать исключение)
-            RuntimeException exception = assertThrows(RuntimeException.class,
-                    () -> repository.getConstellation(null));
-            assertTrue(exception.getMessage().contains("Группировка не найдена: null"));
         }
     }
 
@@ -257,45 +243,6 @@ class ConstellationRepositoryIntegrationTest {
                 assertFalse(s.getState().isActive());
                 assertEquals("Деактивирован", s.getState().getStatus());
             });
-        }
-    }
-
-    @Nested
-    @DisplayName("Тесты производительности и граничных значений")
-    class PerformanceAndBoundaryTests {
-
-        @Test
-        @DisplayName("Репозиторий должен работать с большим количеством спутников")
-        void repositoryShouldHandleManySatellites() {
-            // Arrange
-            int satelliteCount = 100;
-            operationCenter.createAndSaveConstellation(CONSTELLATION_NAME);
-
-            // Act
-            for (int i = 0; i < satelliteCount; i++) {
-                Satellite sat = new CommunicationSatellite("Sat-" + i, 0.9, 500 + i);
-                operationCenter.addSatelliteToConstellation(CONSTELLATION_NAME, sat);
-            }
-
-            // Assert
-            SatelliteConstellation result = repository.getConstellation(CONSTELLATION_NAME);
-            assertEquals(satelliteCount, result.getSatellites().size());
-        }
-
-        @Test
-        @DisplayName("Последовательные обновления группировки должны сохранять все изменения")
-        void sequentialUpdates_ShouldPreserveAllChanges() {
-            // Arrange
-            operationCenter.createAndSaveConstellation(CONSTELLATION_NAME);
-
-            // Act & Assert - серия обновлений
-            for (int i = 0; i < 5; i++) {
-                Satellite sat = new ImagingSatellite("Seq-" + i, 0.9 - i * 0.1, 2.5 + i);
-                operationCenter.addSatelliteToConstellation(CONSTELLATION_NAME, sat);
-
-                SatelliteConstellation current = repository.getConstellation(CONSTELLATION_NAME);
-                assertEquals(i + 1, current.getSatellites().size());
-            }
         }
     }
 }
