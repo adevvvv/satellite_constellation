@@ -5,7 +5,7 @@ import org.example.domains.ImagingSatellite;
 import org.example.domains.Satellite;
 import org.example.domains.SatelliteConstellation;
 import org.example.repository.ConstellationRepository;
-import org.example.services.SpaceOperationCenterService;
+import org.example.services.ConstellationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -31,7 +31,7 @@ class ConstellationRepositoryIntegrationTest {
     private ConstellationRepository repository;
 
     @Autowired
-    private SpaceOperationCenterService operationCenter;
+    private ConstellationService operationCenter;
 
     private Satellite communicationSatellite;
     private Satellite imagingSatellite;

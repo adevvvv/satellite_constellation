@@ -12,9 +12,17 @@ repositories {
 }
 
 dependencies {
+    // Spring Boot Starter
     implementation("org.springframework.boot:spring-boot-starter")
+
+    // Spring Boot Starter AOP (для работы с аннотациями и аспектами)
+    implementation("org.springframework.boot:spring-boot-starter-aop")
+
+    // Lombok
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
+
+    // Тестирование
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
