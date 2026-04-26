@@ -3,37 +3,37 @@ services:
     build:
       context: ./space-operations-system
       tags:
-        - "space-operations-system:v1.0.0"
-    image: space-operations-system:v1.0.0
+        - "space-operations-system:${VERSION:-latest}"
+    image: space-operations-system:${VERSION:-latest}
     container_name: space-operations-system
     environment:
-      - SERVER_PORT=8080
+      - SERVER_PORT=${SERVER_PORT:-8080}
     ports:
-      - "8080:8080"
+      - "${SERVER_PORT:-8080}:${SERVER_PORT:-8080}"
     networks:
       - space-net
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:${SERVER_PORT:-8080}/actuator/health"]
+      interval: ${HEALTHCHECK_INTERVAL:-10s}
+      timeout: ${HEALTHCHECK_TIMEOUT:-5s}
+      retries: ${HEALTHCHECK_RETRIES:-5}
+      start_period: ${HEALTHCHECK_START_PERIOD:-30s}
 
   mission-scheduler:
     build:
       context: ./mission-scheduler
       tags:
-        - "mission-scheduler:v1.0.0"
-    image: mission-scheduler:v1.0.0
+        - "mission-scheduler:${VERSION:-latest}"
+    image: mission-scheduler:${VERSION:-latest}
     container_name: mission-scheduler
     depends_on:
       space-operations-system:
         condition: service_healthy
     environment:
-      - SERVER_PORT=8081
-      - SERVER_URL=http://space-operations-system:8080
+      - SERVER_PORT=${MISSION_PORT:-8081}
+      - SERVER_URL=${SERVER_URL:-http://space-operations-system:8080}
     ports:
-      - "8081:8081"
+      - "${MISSION_PORT:-8081}:${MISSION_PORT:-8081}"
     networks:
       - space-net
 
