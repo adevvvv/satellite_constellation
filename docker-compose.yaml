@@ -1,0 +1,34 @@
+services:
+  space-operations-system:
+    build: ./space-operations-system
+    container_name: space-operations-system
+    environment:
+      - SERVER_PORT=8080
+    ports:
+      - "8080:8080"
+    networks:
+      - space-net
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  mission-scheduler:
+    build: ./mission-scheduler
+    container_name: mission-scheduler
+    depends_on:
+      space-operations-system:
+        condition: service_healthy
+    environment:
+      - SERVER_PORT=8081
+      - SERVER_URL=http://space-operations-system:8080
+    ports:
+      - "8081:8081"
+    networks:
+      - space-net
+
+networks:
+  space-net:
+    driver: bridge

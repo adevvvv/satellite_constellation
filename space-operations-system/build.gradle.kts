@@ -15,7 +15,7 @@ dependencies {
 
     // Spring Boot Starter Web (для RestClient и веб-сервера)
     implementation("org.springframework.boot:spring-boot-starter-web")
-
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     // Spring Boot Starter
     implementation("org.springframework.boot:spring-boot-starter")
 
