@@ -1,6 +1,10 @@
 services:
   space-operations-system:
-    build: ./space-operations-system
+    build:
+      context: ./space-operations-system
+      tags:
+        - "space-operations-system:v1.0.0"
+    image: space-operations-system:v1.0.0
     container_name: space-operations-system
     environment:
       - SERVER_PORT=8080
@@ -16,7 +20,11 @@ services:
       start_period: 30s
 
   mission-scheduler:
-    build: ./mission-scheduler
+    build:
+      context: ./mission-scheduler
+      tags:
+        - "mission-scheduler:v1.0.0"
+    image: mission-scheduler:v1.0.0
     container_name: mission-scheduler
     depends_on:
       space-operations-system:
