@@ -2,21 +2,15 @@
 FROM gradle:8.8-jdk21 AS build
 WORKDIR /app
 
-# Копируем конфигурационные файлы Gradle
-COPY build.gradle.kts settings.gradle.kts ./
-COPY gradle ./gradle
+# Копируем всё содержимое
+COPY . .
 
-# Создаем gradlew скрипт
-RUN gradle wrapper --gradle-version 8.8
+# Даем права и проверяем
+RUN chmod +x gradlew 2>/dev/null || true
+RUN ls -la gradlew
 
-# Даем права на выполнение
-RUN chmod +x gradlew
-
-# Загружаем зависимости
+# Загружаем зависимости (используем gradle вместо gradlew)
 RUN gradle dependencies --no-daemon
-
-# Копируем исходный код
-COPY src ./src
 
 # Собираем приложение
 RUN gradle build -x test --no-daemon

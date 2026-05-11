@@ -36,6 +36,13 @@ public abstract class Satellite {
     @Column(name = "status_message", length = 255)
     protected String statusMessage = "Не активирован";
 
+    // Новые поля для телеметрии
+    @Column(name = "internal_temperature")
+    protected double internalTemperature = 25.0;
+
+    @Column(name = "external_temperature")
+    protected double externalTemperature = -50.0;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "constellation_id")
     protected SatelliteConstellation constellation;
@@ -51,9 +58,12 @@ public abstract class Satellite {
         this.batteryLevel = batteryLevel;
         this.isActive = false;
         this.statusMessage = "Не активирован";
+        this.internalTemperature = 25.0;
+        this.externalTemperature = -50.0;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
-        log.info("Создан спутник: {} (заряд: {})", name, batteryLevel);
+        log.info("Создан спутник: {} (заряд: {}, внутр.темп: {}°C, внеш.темп: {}°C)",
+                name, batteryLevel, internalTemperature, externalTemperature);
     }
 
     @PreUpdate
@@ -98,12 +108,28 @@ public abstract class Satellite {
         batteryLevel = Math.max(0.0, batteryLevel - amount);
     }
 
+    // Методы для обновления телеметрии
+    public void updateTelemetry(double internalTemp, double externalTemp, double batteryLevel) {
+        this.internalTemperature = internalTemp;
+        this.externalTemperature = externalTemp;
+        this.batteryLevel = Math.max(0.0, Math.min(1.0, batteryLevel));
+        log.debug("📊 Телеметрия обновлена для {}: внутр.темп={}°C, внеш.темп={}°C, заряд={}%",
+                name, String.format("%.1f", internalTemp),
+                String.format("%.1f", externalTemp),
+                String.format("%.1f", batteryLevel * 100));
+    }
+
     public SatelliteState getState() {
         return new SatelliteState(this.isActive, this.statusMessage);
     }
 
     public EnergySystem getEnergy() {
         return EnergySystem.of(batteryLevel);
+    }
+
+    public String getTelemetryInfo() {
+        return String.format("%s: внутр.темп=%.1f°C, внеш.темп=%.1f°C, заряд=%.1f%%",
+                name, internalTemperature, externalTemperature, batteryLevel * 100);
     }
 
     public abstract void performMission();
