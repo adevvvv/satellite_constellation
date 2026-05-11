@@ -1,2 +1,8 @@
-rootProject.name = "mission-scheduler"
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
 
+rootProject.name = "mission-scheduler"

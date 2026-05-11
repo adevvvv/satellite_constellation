@@ -28,5 +28,4 @@ public class EnergySystem {
     public boolean hasSufficientPower() {
         return batteryLevel > EnergySystemConstants.LOW_BATTERY_THRESHOLD;
     }
-
 }

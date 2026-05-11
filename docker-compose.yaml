@@ -1,4 +1,23 @@
 services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: satellite-postgres
+    environment:
+      POSTGRES_DB: satellite_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - space-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   space-operations-system:
     build:
       context: ./space-operations-system
@@ -6,8 +25,14 @@ services:
         - "space-operations-system:${VERSION:-latest}"
     image: space-operations-system:${VERSION:-latest}
     container_name: space-operations-system
+    depends_on:
+      postgres:
+        condition: service_healthy
     environment:
       - SERVER_PORT=${SERVER_PORT:-8080}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/satellite_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
     ports:
       - "${SERVER_PORT:-8080}:${SERVER_PORT:-8080}"
     networks:
@@ -36,6 +61,9 @@ services:
       - "${MISSION_PORT:-8081}:${MISSION_PORT:-8081}"
     networks:
       - space-net
+
+volumes:
+  postgres-data:
 
 networks:
   space-net:

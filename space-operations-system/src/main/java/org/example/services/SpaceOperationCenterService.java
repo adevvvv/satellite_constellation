@@ -1,290 +1,108 @@
-// org.example.services/SpaceOperationCenterService.java
 package org.example.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.aop.LogExecutionTime;
-import org.example.domains.CommunicationSatellite;
-import org.example.domains.ImagingSatellite;
-import org.example.domains.Satellite;
-import org.example.domains.SatelliteConstellation;
-import org.example.enums.SatelliteType;
-import org.example.observer.Observer;
-import org.example.params.SatelliteParam;
+import org.example.domains.*;
 import org.example.requests.AddSatelliteRequest;
-import org.example.requests.MissionRequest;
 import org.example.requests.MissionRequestWithType;
+import org.example.params.SatelliteParam;
+import org.example.repository.SatelliteRepository;
+import org.example.factory.SatelliteFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Set;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class SpaceOperationCenterService {
 
     private final ConstellationService constellationService;
-    private final SatelliteService satelliteService;
-    private final Observer observer;
+    private final List<SatelliteFactory> satelliteFactories;
+    private final SatelliteRepository satelliteRepository;
 
-    /**
-     * Создание группировки (делегирование)
-     */
-    @LogExecutionTime(name = "Создание группировки через фасад")
-    public void createAndSaveConstellation(String name) {
-        constellationService.createAndSaveConstellation(name);
-    }
-
-    /**
-     * Добавляет спутники в указанные группировки.
-     * Если группировка не существует, она будет создана автоматически.
-     */
-    @LogExecutionTime(name = "addSatellite", verbose = true)
     public void addSatellite(AddSatelliteRequest request) {
-        log.info("📡 Начало добавления спутников в группировку: {}", request.constellationName());
+        SatelliteConstellation constellation = constellationService.getConstellation(request.constellationName());
 
-        try {
-            // Проверяем существование группировки, если нет - создаем
-            try {
-                constellationService.showConstellationStatus(request.constellationName());
-                log.info("Группировка {} существует", request.constellationName());
-            } catch (Exception e) {
-                log.info("Группировка {} не найдена, создаем новую", request.constellationName());
-                constellationService.createAndSaveConstellation(request.constellationName());
-            }
-
-            // Создаем и добавляем каждый спутник
-            for (SatelliteParam param : request.satelliteParams()) {
-                Satellite satellite = satelliteService.createSatellite(param);
-                constellationService.addSatelliteToConstellation(request.constellationName(), satellite);
-                log.info("✅ Спутник {} успешно добавлен", satellite.getName());
-
-                // Проверка здоровья спутника через Observer
-                observer.checkSatelliteHealth(satellite);
-            }
-
-            log.info("✅ Все спутники успешно добавлены в группировку {}", request.constellationName());
-        } catch (Exception e) {
-            log.error("❌ Ошибка при добавлении спутников: {}", e.getMessage());
-            throw new RuntimeException("Не удалось добавить спутники: " + e.getMessage(), e);
+        for (SatelliteParam param : request.satelliteParams()) {
+            Satellite satellite = createSatelliteFromParam(param);
+            constellation.addSatellite(satellite);
         }
+        constellationService.updateConstellation(constellation.getId(), constellation);
     }
 
-    /**
-     * Выполнение миссии с расширенными параметрами
-     */
-    @LogExecutionTime(name = "executeMission", verbose = true)
+    private Satellite createSatelliteFromParam(SatelliteParam param) {
+        for (SatelliteFactory factory : satelliteFactories) {
+            try {
+                Satellite satellite = factory.createSatellite(param);
+                if (satellite != null) {
+                    return satellite;
+                }
+            } catch (Exception e) {
+                // Пропускаем неподходящую фабрику
+            }
+        }
+        throw new IllegalArgumentException("No suitable factory found for param: " + param.getClass());
+    }
+
     public void executeMission(MissionRequestWithType request) {
-        log.info("🚀 Начало выполнения миссии типа: {}", request.targetType());
-
-        switch (request.targetType()) {
-            case CONSTELLATION -> executeConstellationMission(request);
-            case SINGLE_SATELLITE -> executeSingleSatelliteMission(request);
-            case ALL_CONSTELLATIONS -> executeAllConstellationsMissions(request);
+        if (request.satelliteName() != null) {
+            Satellite satellite = satelliteRepository
+                    .findByNameAndConstellationConstellationName(request.satelliteName(), request.constellationName())
+                    .orElseThrow(() -> new RuntimeException("Спутник не найден: " + request.satelliteName()));
+            satellite.performMission();
+            satelliteRepository.save(satellite);
+        } else {
+            SatelliteConstellation constellation = constellationService.getConstellation(request.constellationName());
+            constellation.executeAllMissions();
+            constellationService.updateConstellation(constellation.getId(), constellation);
         }
     }
 
-    /**
-     * Выполнение миссии (совместимость со старым API)
-     */
-    @LogExecutionTime(name = "executeMission (legacy)")
-    public void executeMission(MissionRequest request) {
-        log.info("🚀 Выполнение миссии для группировок: {}", request.constellationNames());
-
-        for (String constellationName : request.constellationNames()) {
-            try {
-                if (request.activateBeforeMission()) {
-                    constellationService.activateAllSatellites(constellationName);
-                }
-
-                SatelliteConstellation constellation = constellationService.getConstellation(constellationName);
-
-                if (request.satelliteTypes() == null || request.satelliteTypes().isEmpty()) {
-                    constellation.executeAllMissions();
-                } else {
-                    executeFilteredMissions(constellation, request.satelliteTypes());
-                }
-
-                log.info("✅ Миссия выполнена для группировки: {}", constellationName);
-            } catch (Exception e) {
-                log.error("❌ Ошибка для группировки {}: {}", constellationName, e.getMessage());
-            }
-        }
-    }
-
-    /**
-     * Получение статистики по группировке
-     */
-    @LogExecutionTime(name = "Получение статистики")
-    public ConstellationStatistics getConstellationStatistics(String constellationName) {
-        SatelliteConstellation constellation = constellationService.getConstellation(constellationName);
-
-        long activeSatellites = constellation.getSatellites().stream()
-                .filter(s -> s.getState().isActive())
-                .count();
-
-        double avgBatteryLevel = constellation.getSatellites().stream()
-                .mapToDouble(s -> s.getEnergy().getBatteryLevel())
-                .average()
-                .orElse(0.0);
-
-        long lowBatteryCount = constellation.getSatellites().stream()
-                .filter(s -> s.getEnergy().getBatteryLevel() < 0.2)
-                .count();
-
-        return new ConstellationStatistics(
-                constellationName,
-                constellation.getSatellites().size(),
-                activeSatellites,
-                avgBatteryLevel,
-                lowBatteryCount
-        );
-    }
-
-    /**
-     * Деактивация всех спутников в группировке
-     */
-    @LogExecutionTime(name = "Деактивация всех спутников")
-    public void deactivateAllSatellites(String constellationName) {
-        SatelliteConstellation constellation = constellationService.getConstellation(constellationName);
-        log.info("\n=== Деактивация спутников в {} ===", constellationName);
-
-        for (Satellite satellite : constellation.getSatellites()) {
-            satellite.deactivate();
-        }
-    }
-
-    /**
-     * Активация всех спутников в группировке
-     */
-    @LogExecutionTime(name = "Активация всех спутников через фасад")
-    public void activateAllSatellites(String constellationName) {
-        constellationService.activateAllSatellites(constellationName);
-    }
-
-    /**
-     * Показ статуса группировки
-     */
-    public void showConstellationStatus(String constellationName) {
-        constellationService.showConstellationStatus(constellationName);
-    }
-
-    /**
-     * Получение системной сводки
-     */
+    @Transactional(readOnly = true)
     public String getSystemOverview() {
         return constellationService.getSystemOverview();
     }
 
-    /**
-     * Выполнение миссии для группировки с фильтрацией
-     */
-    private void executeConstellationMission(MissionRequestWithType request) {
-        SatelliteConstellation constellation = constellationService.getConstellation(request.constellationName());
-
-        // Активируем все спутники перед миссией
-        constellationService.activateAllSatellites(request.constellationName());
-
-        if (request.targetTypes() == null || request.targetTypes().isEmpty()) {
-            constellation.executeAllMissions();
-        } else {
-            executeFilteredMissions(constellation, request.targetTypes());
-        }
-    }
-
-    /**
-     * Выполнение миссии для одного спутника
-     */
-    private void executeSingleSatelliteMission(MissionRequestWithType request) {
-        SatelliteConstellation constellation = constellationService.getConstellation(request.constellationName());
-
-        Satellite satellite = constellation.getSatellites().stream()
-                .filter(s -> s.getName().equals(request.satelliteName()))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Спутник не найден: " + request.satelliteName()));
-
-        satellite.activate();
-        satellite.performMission();
-
-        // Проверка здоровья спутника после миссии
-        observer.checkSatelliteHealth(satellite);
-    }
-
-    /**
-     * Выполнение миссий для всех группировок
-     */
-    private void executeAllConstellationsMissions(MissionRequestWithType request) {
-        var allConstellations = constellationService.getAllConstellations();
-
-        for (SatelliteConstellation constellation : allConstellations.values()) {
-            constellationService.activateAllSatellites(constellation.getConstellationName());
-
-            if (request.targetTypes() == null || request.targetTypes().isEmpty()) {
-                constellation.executeAllMissions();
-            } else {
-                executeFilteredMissions(constellation, request.targetTypes());
-            }
-        }
-    }
-
-    /**
-     * Выполнение миссий только для определенных типов спутников
-     */
-    private void executeFilteredMissions(SatelliteConstellation constellation, Set<SatelliteType> targetTypes) {
-        constellation.getSatellites().stream()
-                .filter(satellite -> {
-                    if (targetTypes.contains(SatelliteType.COMMUNICATION) &&
-                            satellite instanceof CommunicationSatellite) {
-                        return true;
-                    }
-                    if (targetTypes.contains(SatelliteType.IMAGE) &&
-                            satellite instanceof ImagingSatellite) {
-                        return true;
-                    }
-                    return false;
-                })
-                .forEach(satellite -> {
-                    satellite.performMission();
-                    observer.checkSatelliteHealth(satellite);
-                });
-    }
-
-    @LogExecutionTime(name = "Вывод спутника из эксплуатации")
     public void decommissionSatellite(String constellationName, String satelliteName) {
-        log.info("🗑️ Вывод спутника {} из группировки {} из эксплуатации", satelliteName, constellationName);
+        satelliteRepository.deleteByNameAndConstellationConstellationName(satelliteName, constellationName);
+        log.info("🗑️ Спутник {} выведен из эксплуатации", satelliteName);
+    }
 
+    @Transactional(readOnly = true)
+    public ConstellationStatistics getConstellationStatistics(String constellationName) {
         SatelliteConstellation constellation = constellationService.getConstellation(constellationName);
+        long activeCount = satelliteRepository.findActiveSatellitesByConstellationName(constellationName).size();
 
-        Satellite satellite = constellation.getSatellites().stream()
-                .filter(s -> s.getName().equals(satelliteName))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Спутник не найден: " + satelliteName));
-
-        satellite.deactivate();
-
-        // Удаляем спутник из группировки
-        constellation.getSatellites().remove(satellite);
-
-        // Обновляем в репозитории
-        constellationService.updateConstellation(constellationName, constellation);
-
-        log.info("✅ Спутник {} выведен из эксплуатации", satelliteName);
+        return new ConstellationStatistics(
+                constellation.getConstellationName(),
+                constellation.getSatellites().size(),
+                activeCount,
+                constellation.getSatellites().size() - activeCount
+        );
     }
 
-    /**
-     * Класс для статистики группировки
-     */
+    public void activateAllSatellites(String constellationName) {
+        SatelliteConstellation constellation = constellationService.getConstellation(constellationName);
+        constellation.getSatellites().forEach(Satellite::activate);
+        constellationService.updateConstellation(constellation.getId(), constellation);
+    }
+
+    public void deactivateAllSatellites(String constellationName) {
+        SatelliteConstellation constellation = constellationService.getConstellation(constellationName);
+        constellation.getSatellites().forEach(Satellite::deactivate);
+        constellationService.updateConstellation(constellation.getId(), constellation);
+    }
+
     public record ConstellationStatistics(
-            String name,
-            long totalSatellites,
+            String constellationName,
+            int totalSatellites,
             long activeSatellites,
-            double avgBatteryLevel,
-            long lowBatteryCount
-    ) {
-        @Override
-        public String toString() {
-            return String.format("Группировка: %s | Всего: %d | Активных: %d | Низкий заряд: %d | Средний заряд: %.2f%%",
-                    name, totalSatellites, activeSatellites, lowBatteryCount, avgBatteryLevel * 100);
-        }
-    }
+            long inactiveSatellites
+    ) {}
 }

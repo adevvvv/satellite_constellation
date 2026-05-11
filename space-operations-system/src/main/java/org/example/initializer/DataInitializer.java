@@ -1,59 +1,35 @@
 package org.example.initializer;
 
-
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.params.CommunicationSatelliteParam;
-import org.example.params.ImagingSatelliteParam;
-import org.example.params.SatelliteParam;
-import org.example.requests.AddSatelliteRequest;
-import org.example.services.SpaceOperationCenterService;
+import org.example.domains.CommunicationSatellite;
+import org.example.domains.ImagingSatellite;
+import org.example.domains.SatelliteConstellation;
+import org.example.services.ConstellationService;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.List;
-
-@Slf4j
 @Component
 @RequiredArgsConstructor
-public class DataInitializer {
+@Slf4j
+public class DataInitializer implements CommandLineRunner {
 
-    private final SpaceOperationCenterService operationCenter;
+    private final ConstellationService constellationService;
 
-    @PostConstruct
-    public void init() {
-        log.info("🚀 Инициализация начальных данных...");
+    @Override
+    public void run(String... args) {
+        if (constellationService.getAllConstellations().isEmpty()) {
+            log.info("📡 Инициализация тестовых данных...");
 
-        // Проверяем и создаем группировки только если их нет
-        createConstellationIfNotExists("GeoStationary",
-                Arrays.asList(
-                        new CommunicationSatelliteParam("GeoCom-1", 0.85, 1000.0),
-                        new CommunicationSatelliteParam("GeoCom-2", 0.90, 800.0)
-                ));
+            SatelliteConstellation constellation = constellationService.createAndSaveConstellation("StarLink");
 
-        createConstellationIfNotExists("LowOrbit",
-                Arrays.asList(
-                        new ImagingSatelliteParam("Sat-1", 0.75, 1.5),
-                        new ImagingSatelliteParam("Sat-2", 0.80, 2.0)
-                ));
+            CommunicationSatellite commSat = new CommunicationSatellite("CommSat-1", 0.9, 100.0);
+            ImagingSatellite imgSat = new ImagingSatellite("ImgSat-1", 0.85, 0.5);
 
-        createConstellationIfNotExists("TestConstellation",
-                Arrays.asList(
-                        new CommunicationSatelliteParam("TestCom-1", 0.95, 500.0),
-                        new ImagingSatelliteParam("TestImg-1", 0.88, 1.0)
-                ));
+            constellationService.addSatelliteToConstellation("StarLink", commSat);
+            constellationService.addSatelliteToConstellation("StarLink", imgSat);
 
-        log.info("✅ Инициализация завершена");
-    }
-
-    private void createConstellationIfNotExists(String name, List<SatelliteParam> satellites) {
-        try {
-            operationCenter.showConstellationStatus(name);
-            log.info("📌 Группировка {} уже существует", name);
-        } catch (Exception e) {
-            operationCenter.addSatellite(new AddSatelliteRequest(name, satellites));
-            log.info("✅ Создана группировка {} с {} спутниками", name, satellites.size());
+            log.info("✅ Тестовые данные загружены в БД");
         }
     }
 }

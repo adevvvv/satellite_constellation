@@ -12,28 +12,24 @@ repositories {
 }
 
 dependencies {
-
-    // Spring Boot Starter Web (для RestClient и веб-сервера)
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
-    // Spring Boot Starter
     implementation("org.springframework.boot:spring-boot-starter")
-
-    // Spring Boot Starter AOP (для работы с аннотациями и аспектами)
     implementation("org.springframework.boot:spring-boot-starter-aop")
-
-    // Lombok
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    runtimeOnly("org.postgresql:postgresql")
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
-
-    // Тестирование
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
-
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5")
 }
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.withType<JavaCompile> {
+    options.compilerArgs.add("-parameters")
 }

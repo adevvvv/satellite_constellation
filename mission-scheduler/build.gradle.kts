@@ -22,6 +22,12 @@ dependencies {
     // Spring Boot Starter AOP (для работы с аннотациями и аспектами)
     implementation("org.springframework.boot:spring-boot-starter-aop")
 
+    // Spring Data JPA
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+
+    // PostgreSQL Driver
+    runtimeOnly("org.postgresql:postgresql")
+
     // Lombok
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")

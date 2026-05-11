@@ -1,28 +1,15 @@
 package org.example.domains;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 
 @Getter
 @ToString
+@AllArgsConstructor
 public class SatelliteState {
-    private boolean isActive = false;
-    private String statusMessage = "Не активирован";
-
-    public boolean activate(boolean hasSufficientPower) {
-        if (hasSufficientPower && !isActive) {
-            isActive = true;
-            statusMessage = "Активен";
-            return true;
-        }
-        statusMessage = hasSufficientPower ? "Уже активен" : "Недостаточно энергии";
-        return false;
-    }
-
-    public void deactivate() {
-        isActive = false;
-        statusMessage = "Деактивирован";
-    }
+    private boolean isActive;
+    private String statusMessage;
 
     public String getStatus() {
         return statusMessage;
