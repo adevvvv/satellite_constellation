@@ -20,6 +20,13 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     runtimeOnly("org.postgresql:postgresql")
 
+    // ✅ Spring Kafka
+    implementation("org.springframework.kafka:spring-kafka")
+
+    // ✅ Jackson для сериализации/десериализации JSON
+    implementation("com.fasterxml.jackson.core:jackson-databind")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
 
@@ -29,11 +36,14 @@ dependencies {
     implementation("net.devh:grpc-client-spring-boot-starter:3.0.0.RELEASE")
     compileOnly("org.apache.tomcat:annotations-api:6.0.53")
 
+    // Swagger/OpenAPI
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5")
+
+    // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.kafka:spring-kafka-test")
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
-
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5")
 }
 
 protobuf {

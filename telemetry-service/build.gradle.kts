@@ -17,7 +17,14 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter")
 
-    // gRPC Server - совместимые версии
+    // ✅ Spring Kafka
+    implementation("org.springframework.kafka:spring-kafka")
+
+    // ✅ Jackson для сериализации/десериализации JSON
+    implementation("com.fasterxml.jackson.core:jackson-databind")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+
+    // gRPC Server
     implementation("net.devh:grpc-server-spring-boot-starter:2.15.0.RELEASE")
     implementation("io.grpc:grpc-protobuf:1.54.0")
     implementation("io.grpc:grpc-stub:1.54.0")
@@ -30,6 +37,7 @@ dependencies {
 
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.kafka:spring-kafka-test")
 }
 
 protobuf {

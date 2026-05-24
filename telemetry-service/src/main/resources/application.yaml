@@ -4,6 +4,15 @@ server:
 spring:
   application:
     name: telemetry-service
+  kafka:
+    bootstrap-servers: kafka:9092
+    consumer:
+      group-id: telemetry-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "org.example.event"
+        spring.json.value.default.type: org.example.event.SatelliteEvent
 
 grpc:
   server:
