@@ -1,0 +1,16 @@
+# Результаты тестов (генерируются автоматически)
+results/
+*.html
+*.json
+!package.json
+!k6-config.json
+
+# Временные файлы
+*.log
+node_modules/
+temp/
+.history/
+
+# Отчеты Allure
+allure-results/
+allure-report/

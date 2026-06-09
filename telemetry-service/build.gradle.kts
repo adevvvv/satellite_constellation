@@ -17,10 +17,20 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter")
 
-    // ✅ Spring Kafka
+    // Spring Data JPA для работы с Inbox таблицей
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+
+    // PostgreSQL драйвер
+    runtimeOnly("org.postgresql:postgresql")
+
+    // Flyway для миграций
+    implementation("org.flywaydb:flyway-core")
+    implementation("org.flywaydb:flyway-database-postgresql")
+
+    // Spring Kafka
     implementation("org.springframework.kafka:spring-kafka")
 
-    // ✅ Jackson для сериализации/десериализации JSON
+    // Jackson для сериализации/десериализации JSON
     implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
@@ -38,6 +48,12 @@ dependencies {
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.kafka:spring-kafka-test")
+
+    // Testcontainers для интеграционных тестов
+    testImplementation("org.testcontainers:testcontainers:1.19.3")
+    testImplementation("org.testcontainers:junit-jupiter:1.19.3")
+    testImplementation("org.testcontainers:kafka:1.19.3")
+    testImplementation("org.testcontainers:postgresql:1.19.3")
 }
 
 protobuf {
