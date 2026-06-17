@@ -1,0 +1,25 @@
+# Build stage
+FROM gradle:8.8-jdk21 AS build
+WORKDIR /app
+
+# Копируем всё содержимое
+COPY . .
+
+# Даем права и проверяем
+RUN chmod +x gradlew 2>/dev/null || true
+RUN ls -la gradlew
+
+# Загружаем зависимости
+RUN gradle dependencies --no-daemon
+
+# Генерируем proto и собираем приложение
+RUN gradle generateProto build -x test --no-daemon
+
+# Run stage
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
+COPY --from=build /app/build/libs/*.jar app.jar
+USER appuser
+EXPOSE 8082 9091
+ENTRYPOINT ["java", "-jar", "app.jar"]
